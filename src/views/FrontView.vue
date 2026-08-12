@@ -1,7 +1,10 @@
 <template>
     <div class="card-front">
         <!-- Phân này có nhiệm vụ Gợi ý từ vựng cần học -->
-        <div class="card-front__hint"></div> 
+        <div class="card-front__hint">
+            <MnemonicStory/>
+            <AudioVocab/>
+        </div> 
         <!-- Phần này thực hiện nhiệm vụ luyện tập từ vựng -->
         <div class="card-front__practice"></div>
     </div>
@@ -16,16 +19,11 @@
     border-radius: 8px;
     background-color: rgb(249, 252, 252);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-    
-    // Tạo khoảng cách giữa các khối con theo chiều dọc.
     display: flex;
     flex-direction: column;
     gap: 30px;
     
-
-
     &__hint {
-        height: 50px;
         width: 100%;
         background-color: #c9c6c6;
     }
@@ -37,3 +35,8 @@
     }
 }
 </style> 
+
+<script setup lang="ts">
+import AudioVocab from '@/components/AudioVocab.vue';
+import MnemonicStory from '@/components/MnemonicStory.vue';
+</script>
