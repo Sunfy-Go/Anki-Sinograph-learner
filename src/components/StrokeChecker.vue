@@ -1,0 +1,144 @@
+<template>
+    <teleport to="body">
+        <div class="stroke-checker">
+            <div class="stroke-checker__learn">
+                <div class="stroke-checker__grid" :data-count="charList.length">
+                    <div v-for="(index) in charList" :key="index" class="stroke-checker__box">
+                        <canvas class="stroke-checker__canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stroke-checker__controller">
+                <button class="stroke-checker__btn-back" @click="emits('back')">返回</button>
+                <button class="stroke-checker__btn-check">检查</button>
+            </div>
+        </div>
+    </teleport>
+</template>
+
+<script lang="ts" setup>
+import { computed } from 'vue';
+
+// Ví dụ: "学" (1 chữ), "电脑" (2 chữ), "服务员" (3 chữ), "一石二鸟" (4 chữ)
+const props = withDefaults(defineProps<{ word?: string; }>(), { word: '电脑脑' });
+const charList = computed(() => { return props.word.split('') });
+const emits = defineEmits<{ back: [] }>();
+</script>
+
+<style lang="scss" scoped>
+.stroke-checker {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    width: calc(100vw - 40px);
+    height: calc(100vh - 40px);
+    z-index: 9999;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 9999px rgba(38, 37, 37, 0.682);
+    border-radius: 5px;
+    
+
+    display: flex;
+    flex-direction: column;
+
+    &__learn {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        overflow: hidden;
+        padding: 16px;
+        box-sizing: border-box;
+    }
+
+    &__grid {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 16px; 
+        width: 100%;
+    }
+
+    &__grid[data-count="1"] {
+        .stroke-checker__box {
+            max-width: 500px; 
+        }
+    }
+
+    &__grid[data-count="4"] {
+        gap: 8px; 
+        
+        .stroke-checker__box {
+            max-width: 250px; 
+        }
+    }
+
+    &__box {
+        position: relative;
+        flex: 1; /* Tự động chia đều chiều rộng theo số ô */
+        aspect-ratio: 1 / 1; /* BẮT BUỘC: Đảm bảo ô luôn là HÌNH VUÔNG */
+
+        max-width: 400px;
+        max-height: 70vh;
+
+        background-color: #ffffff;
+        border: 2px solid #9d9d9d;
+        border-radius: 2px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+
+        background-image: 
+            linear-gradient(to right, transparent calc(50% - 1px), #d1c7b7 calc(50% - 1px), #d1c7b7 calc(50% + 1px), transparent calc(50% + 1px)),
+            linear-gradient(to bottom, transparent calc(50% - 1px), #d1c7b7 calc(50% - 1px), #d1c7b7 calc(50% + 1px), transparent calc(50% + 1px)),
+        
+            linear-gradient(45deg, transparent calc(50% - 0.8px), #e8e0d5 calc(50% - 0.8px), #e8e0d5 calc(50% + 0.8px), transparent calc(50% + 0.8px)),
+            linear-gradient(-45deg, transparent calc(50% - 0.8px), #e8e0d5 calc(50% - 0.8px), #e8e0d5 calc(50% + 0.8px), transparent calc(50% + 0.8px));
+
+        &:hover {
+            border: 2px solid #8edb46;
+        }
+    }
+
+    &__canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    &__controller {
+        width: 100%;
+        height: 48px;
+        flex-shrink: 0;
+        display: flex;
+        border-radius: 0px 0px 4px 4px;
+        overflow: hidden;
+        margin-top: 16px;
+    }
+
+    &__btn-back, 
+    &__btn-check {
+        flex: 1;
+        height: 100%;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    &__btn-back { 
+        color: #c6e1ea;
+        background-color: #6c8891; 
+    } 
+    &__btn-check { 
+        color: #e6eac6;
+        background-color: #809944; 
+    }
+}
+</style>

@@ -6,7 +6,9 @@
             <AudioVocab/>
         </div> 
         <!-- Phần này thực hiện nhiệm vụ luyện tập từ vựng -->
-        <div class="card-front__practice"></div>
+        <div class="card-front__practice">
+            <VocabularyPractice/>
+        </div>
     </div>
 </template>
 
@@ -29,7 +31,6 @@
     }
 
     &__practice {
-        height: 50px;
         width: 100%;
         background-color: #4f9966;
     }
@@ -39,4 +40,5 @@
 <script setup lang="ts">
 import AudioVocab from '@/components/AudioVocab.vue';
 import MnemonicStory from '@/components/MnemonicStory.vue';
+import VocabularyPractice from '@/components/VocabularyPractice.vue';
 </script>
