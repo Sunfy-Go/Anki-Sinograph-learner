@@ -4,7 +4,7 @@
             <div class="stroke-checker__learn">
                 <div class="stroke-checker__grid" :data-count="charList.length">
                     <div v-for="(index) in charList" :key="index" class="stroke-checker__box">
-                        <canvas class="stroke-checker__canvas"></canvas>
+                        <canvas :ref="(el) => initializeCell(el as HTMLCanvasElement)" class="stroke-checker__canvas"></canvas>
                     </div>
                 </div>
             </div>
@@ -18,12 +18,14 @@
 </template>
 
 <script lang="ts" setup>
+import { useSketch } from '@/composables/useSketch';
 import { computed } from 'vue';
 
-// Ví dụ: "学" (1 chữ), "电脑" (2 chữ), "服务员" (3 chữ), "一石二鸟" (4 chữ)
 const props = withDefaults(defineProps<{ word?: string; }>(), { word: '电脑脑' });
 const charList = computed(() => { return props.word.split('') });
 const emits = defineEmits<{ back: [] }>();
+const { initializeCell } = useSketch();
+
 </script>
 
 <style lang="scss" scoped>
@@ -99,7 +101,7 @@ const emits = defineEmits<{ back: [] }>();
             linear-gradient(-45deg, transparent calc(50% - 0.8px), #e8e0d5 calc(50% - 0.8px), #e8e0d5 calc(50% + 0.8px), transparent calc(50% + 0.8px));
 
         &:hover {
-            border: 2px solid #8edb46;
+            border: 2px solid #070707;
         }
     }
 
