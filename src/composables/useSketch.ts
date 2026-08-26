@@ -1,9 +1,11 @@
-import { getCanvasPath2D, getMousePos, type Point2D } from '@/utils/utils';
+import { getCanvasPath2D, getMousePos } from '@/utils/utils';
 import { getStroke, type StrokeOptions, } from 'perfect-freehand';
+import type { Point2D } from '@/utils/Math';
+import { Stroke } from '@/utils/Stroke';
 
 export const useSketch = () => {
     const strokeOptions: StrokeOptions = {
-        size: 5,
+        size: 1,
         thinning: 0.1,
         smoothing: 0.5,
         streamline: 0.4,
@@ -14,16 +16,16 @@ export const useSketch = () => {
 
     const initializeCell = (canvas: HTMLCanvasElement | null) => {
         if (!canvas) return;
-
         const context = canvas.getContext('2d');
         if (!context) return;
 
         let isDrawing = false;
-        let currentPoint: Point2D[] = [];
-        const allStrokes: Point2D[][] = [];
         let cssWidth = 0;
         let cssHeight = 0;
-
+        
+        let currentPoint: Point2D[] = [];
+        let stroke: Stroke = new Stroke();
+ 
         // Set canvas buffer đúng theo kích thước hiển thị thực tế + devicePixelRatio
         const resizeCanvas = () => {
             const rect = canvas.getBoundingClientRect();
@@ -44,14 +46,8 @@ export const useSketch = () => {
 
         const render = () => {
             context.clearRect(0, 0, cssWidth, cssHeight);
-            context.fillStyle = '#000000';
-
-            // Vẽ tất cả các nét trước đó.
-            for (const stroke of allStrokes) {
-                if (stroke.length < 2) continue;
-                const outline = getStroke(stroke, strokeOptions);
-                context.fill(getCanvasPath2D(outline));
-            }
+            context.fillStyle = '#ac5e5e';
+            stroke.draw(context);
 
             // Vẽ nét hiện tại.
             if (currentPoint.length > 2) {
@@ -69,10 +65,11 @@ export const useSketch = () => {
 
         const handlePointerUp = () => {
             isDrawing = false;
-            if (currentPoint.length > 0) {
-                allStrokes.push([...currentPoint]);
-                currentPoint = [];
-            }
+            if (currentPoint.length <= 0) return;
+
+            stroke.initialize(currentPoint);
+            currentPoint = [];
+            render();
         };
 
         const handlePointerMove = (el: PointerEvent) => {
@@ -91,7 +88,6 @@ export const useSketch = () => {
         resizeObserver.observe(canvas);
         resizeCanvas();
 
-        // Trả về hàm cleanup để gọi khi unmount (xem lưu ý bên dưới)
         return () => {
             resizeObserver.disconnect();
             canvas.removeEventListener('pointerdown', handlePointerDown);
@@ -103,3 +99,18 @@ export const useSketch = () => {
 
     return { initializeCell };
 };
+
+
+
+// Vẽ tất cả các nét trước đó.
+// for (const stroke of allStrokes) {
+//     if (stroke.length < 2) continue;
+//     const outline = getStroke(stroke, strokeOptions);
+//     context.fill(getCanvasPath2D(outline));
+// }
+
+// const stroke = new Stroke(currentPoint);
+// stroke.Test();
+
+// allStrokes.push([...currentPoint]);
+// strokes.push(stroke);

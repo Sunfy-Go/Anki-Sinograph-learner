@@ -1,4 +1,7 @@
-export type Point2D = [number, number];
+// export type Point2D = [number, number];
+
+import type { Vec2 } from "perfect-freehand"
+import { Point2D } from "./Math"
 
 export const getTimeStr = (t: number)=> {
     if (!isFinite(t) || t < 0) return '0:00'
@@ -19,16 +22,17 @@ export const getDataElement = (className: string)=> {
     return initialAudioUrl;
 }
 
-// Tính khoảng cách giữa hai điểm 
-export const getDist = (vector1: Point2D, vector2: Point2D): number => {
-    const dx = vector2[0] - vector1[0];
-    const dy = vector2[1] - vector1[1];
-    return Math.hypot(dx, dy);
-}
+// export const getMousePos = (canvas: HTMLCanvasElement, evt: MouseEvent | PointerEvent) => {
+//     const rect = canvas.getBoundingClientRect();
+//     return [evt.clientX - rect.left, evt.clientY - rect.top] as Point2D;
+// };
 
 export const getMousePos = (canvas: HTMLCanvasElement, evt: MouseEvent | PointerEvent) => {
     const rect = canvas.getBoundingClientRect();
-    return [evt.clientX - rect.left, evt.clientY - rect.top] as Point2D;
+    let point = new Point2D();
+    point.x = evt.clientX - rect.left;
+    point.y = evt.clientY - rect.top;
+    return point;
 };
 
 // Lấy vị trí thực tế trên cavas.
@@ -45,7 +49,15 @@ export const getMousePos = (canvas: HTMLCanvasElement, evt: MouseEvent | Pointer
 //     ];
 // }
 
-export const getCanvasPath2D = (strokeOutline: Point2D[]): Path2D => {
+
+// Tính khoảng cách giữa hai điểm 
+// export const getDist = (vector1: Point2D, vector2: Point2D): number => {
+//     const dx = vector2[0] - vector1[0];
+//     const dy = vector2[1] - vector1[1];
+    // return Math.hypot(dx, dy);
+// }
+
+export const getCanvasPath2D = (strokeOutline: Vec2[]): Path2D => {
     const path = new Path2D();
     if (strokeOutline.length === 0) return path;
 
