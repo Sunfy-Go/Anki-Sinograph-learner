@@ -1,12 +1,23 @@
 import { getLength, Point2D } from "./Math";
 
 export class Bezier {
-    private p0 = new Point2D();
-    private p1 = new Point2D();
-    private p2 = new Point2D();
-    private p3 = new Point2D();
+    private p0: Point2D;
+    private p1: Point2D;
+    private p2: Point2D;
+    private p3: Point2D;
 
-    public initialize(points: Point2D[]) {
+    constructor(points: Point2D[]) {
+        this.p0 = new Point2D();
+        this.p1 = new Point2D();
+        this.p2 = new Point2D();
+        this.p3 = new Point2D();
+
+        if (points && points.length > 2) {
+            this.fitFromPoints(points);
+        }
+    }
+
+    public fitFromPoints(points: Point2D[]) {
         if (!points || points.length < 2) return;
 
         this.p0 = points[0]!;

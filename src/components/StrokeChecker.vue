@@ -1,11 +1,19 @@
 <template>
     <teleport to="body">
         <div class="stroke-checker">
+            
             <div class="stroke-checker__learn">
                 <div class="stroke-checker__grid" :data-count="charList.length">
-                    <div v-for="(index) in charList" :key="index" class="stroke-checker__box">
-                        <canvas :ref="(el) => initializeCell(el as HTMLCanvasElement)" class="stroke-checker__canvas"></canvas>
-                    </div>
+                    <StrokeCell v-for="(char, i) in charList" 
+                        :key="`${char}_${i}`"  
+                        :ref="(el)=> { if(el) cellRefs[i] = el as InstanceType<typeof StrokeCell> }"
+                        @select="activeIndex = i" 
+                    />
+                </div>
+                <div class="stroke-checker__tool">
+                    <button class="botton-tool stroke-checker__tool-undo" @click="handleUndo">undo</button>
+                    <button class="botton-tool stroke-checker__tool-redo" @click="handleRedo">redo</button>
+                    <button class="botton-tool stroke-checker__tool-clear" @click="handleClear">clear</button>
                 </div>
             </div>
 
@@ -18,14 +26,19 @@
 </template>
 
 <script lang="ts" setup>
-import { useSketch } from '@/composables/useSketch';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import StrokeCell from './StrokeCell.vue';
 
 const props = withDefaults(defineProps<{ word?: string; }>(), { word: '电脑脑' });
 const charList = computed(() => { return props.word.split('') });
-const emits = defineEmits<{ back: [] }>();
-const { initializeCell } = useSketch();
+const cellRefs = ref<InstanceType<typeof StrokeCell>[]>([]);
+const activeIndex = ref<number>(0);
 
+const handleUndo = ()=> cellRefs.value[activeIndex.value]?.undo();
+const handleRedo = ()=> cellRefs.value[activeIndex.value]?.redo();
+const handleClear = ()=> cellRefs.value[activeIndex.value]?.clear();
+
+const emits = defineEmits<{ back: [] }>();
 </script>
 
 <style lang="scss" scoped>
@@ -42,13 +55,13 @@ const { initializeCell } = useSketch();
     box-shadow: 0 0 0 9999px rgba(38, 37, 37, 0.682);
     border-radius: 5px;
     
-
     display: flex;
     flex-direction: column;
 
     &__learn {
         flex: 1;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         width: 100%;
@@ -66,6 +79,14 @@ const { initializeCell } = useSketch();
         width: 100%;
     }
 
+    &__tool {
+        width: 100%;
+        margin-top: 30px;
+        display: flex;
+        gap: 10px;
+    }
+
+    // ---------------------------------------
     &__grid[data-count="1"] {
         .stroke-checker__box {
             max-width: 500px; 
@@ -79,40 +100,7 @@ const { initializeCell } = useSketch();
             max-width: 250px; 
         }
     }
-
-    &__box {
-        position: relative;
-        flex: 1; /* Tự động chia đều chiều rộng theo số ô */
-        aspect-ratio: 1 / 1; /* BẮT BUỘC: Đảm bảo ô luôn là HÌNH VUÔNG */
-
-        max-width: 400px;
-        max-height: 70vh;
-
-        background-color: #ffffff;
-        border: 2px solid #9d9d9d;
-        border-radius: 2px;
-        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
-
-        background-image: 
-            linear-gradient(to right, transparent calc(50% - 1px), #d1c7b7 calc(50% - 1px), #d1c7b7 calc(50% + 1px), transparent calc(50% + 1px)),
-            linear-gradient(to bottom, transparent calc(50% - 1px), #d1c7b7 calc(50% - 1px), #d1c7b7 calc(50% + 1px), transparent calc(50% + 1px)),
-        
-            linear-gradient(45deg, transparent calc(50% - 0.8px), #e8e0d5 calc(50% - 0.8px), #e8e0d5 calc(50% + 0.8px), transparent calc(50% + 0.8px)),
-            linear-gradient(-45deg, transparent calc(50% - 0.8px), #e8e0d5 calc(50% - 0.8px), #e8e0d5 calc(50% + 0.8px), transparent calc(50% + 0.8px));
-
-        &:hover {
-            border: 2px solid #070707;
-        }
-    }
-
-    &__canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 2;
-    }
+    //---------------------
 
     &__controller {
         width: 100%;
@@ -142,5 +130,9 @@ const { initializeCell } = useSketch();
         color: #e6eac6;
         background-color: #809944; 
     }
+}
+
+.botton-tool {
+    padding: 5px 10px;
 }
 </style>

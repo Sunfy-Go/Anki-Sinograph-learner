@@ -1,73 +1,38 @@
-import { getCanvasPath2D, getMousePos } from '@/utils/utils';
-import { getStroke, type StrokeOptions, } from 'perfect-freehand';
+import { getMousePos } from '@/utils/utils';
 import type { Point2D } from '@/utils/Math';
-import { Stroke } from '@/utils/Stroke';
+import { StrokeManager } from '@/utils/StrokeManager';
+import { PenDraw } from '@/utils/PenDraw';
 
 export const useSketch = () => {
-    const strokeOptions: StrokeOptions = {
-        size: 1,
-        thinning: 0.1,
-        smoothing: 0.5,
-        streamline: 0.4,
-        easing: (t) => Math.sin((t * Math.PI) / 2),
-        start: { taper: 0, cap: true },
-        end: { taper: 0, cap: true }
-    };
+    let isDrawing = false;
+    let cssWidth = 0;
+    let cssHeight = 0;
+
+    let canvasEl: HTMLCanvasElement | null = null;
+    let context: CanvasRenderingContext2D | null = null;
+    
+    let currentPoint: Point2D[] = [];
+    let penDraw: PenDraw = new PenDraw();
+    let strokeManager: StrokeManager = new StrokeManager();
+
 
     const initializeCell = (canvas: HTMLCanvasElement | null) => {
         if (!canvas) return;
-        const context = canvas.getContext('2d');
+
+        canvasEl = canvas;
+        context = canvas.getContext('2d');
         if (!context) return;
-
-        let isDrawing = false;
-        let cssWidth = 0;
-        let cssHeight = 0;
-        
-        let currentPoint: Point2D[] = [];
-        let stroke: Stroke = new Stroke();
- 
-        // Set canvas buffer đúng theo kích thước hiển thị thực tế + devicePixelRatio
-        const resizeCanvas = () => {
-            const rect = canvas.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-
-            cssWidth = rect.width;
-            cssHeight = rect.height;
-
-            canvas.width = Math.round(cssWidth * dpr);
-            canvas.height = Math.round(cssHeight * dpr);
-
-            // Reset transform trước khi scale lại (tránh cộng dồn khi resize nhiều lần)
-            context.setTransform(1, 0, 0, 1, 0, 0);
-            context.scale(dpr, dpr);
-
-            render(); // vẽ lại nét cũ vì resize sẽ xoá canvas
-        };
-
-        const render = () => {
-            context.clearRect(0, 0, cssWidth, cssHeight);
-            context.fillStyle = '#ac5e5e';
-            stroke.draw(context);
-
-            // Vẽ nét hiện tại.
-            if (currentPoint.length > 2) {
-                const currentOutline = getStroke(currentPoint, strokeOptions);
-                context.fill(getCanvasPath2D(currentOutline));
-            }
-        };
 
         const handlePointerDown = (el: PointerEvent) => {
             isDrawing = true;
             currentPoint = [];
             currentPoint.push(getMousePos(canvas, el));
-            render();
         };
 
         const handlePointerUp = () => {
             isDrawing = false;
             if (currentPoint.length <= 0) return;
-
-            stroke.initialize(currentPoint);
+            strokeManager.addStroke(currentPoint);
             currentPoint = [];
             render();
         };
@@ -88,6 +53,7 @@ export const useSketch = () => {
         resizeObserver.observe(canvas);
         resizeCanvas();
 
+        // Trả về hàm dọn dẹp Event Listeners
         return () => {
             resizeObserver.disconnect();
             canvas.removeEventListener('pointerdown', handlePointerDown);
@@ -97,20 +63,51 @@ export const useSketch = () => {
         };
     };
 
-    return { initializeCell };
+    const undo = ()=> {
+        strokeManager.undo();
+        console.log("Undo");
+        render();
+    }
+
+    const redo = ()=> {
+        strokeManager.redo();
+        render();
+    }
+
+    const clear = ()=> {
+        strokeManager.clear();
+        render();
+    }
+
+    // Set canvas buffer đúng theo kích thước hiển thị thực tế + devicePixelRatio
+    const resizeCanvas = () => {
+        if (!canvasEl || !context) return;
+
+        const rect = canvasEl.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+
+        cssWidth = rect.width;
+        cssHeight = rect.height;
+
+        canvasEl.width = Math.round(cssWidth * dpr);
+        canvasEl.height = Math.round(cssHeight * dpr);
+
+        // Reset transform trước khi scale lại (tránh cộng dồn khi resize nhiều lần)
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.scale(dpr, dpr);
+
+        // Vẽ lại nét cũ vì resize sẽ xoá canvas
+        render(); 
+    };
+
+    const render = () => {
+        if (!context) return;
+        context.clearRect(0, 0, cssWidth, cssHeight);
+        context.fillStyle = '#ac5e5e';
+        penDraw.draw(context, currentPoint);
+        strokeManager.draw(context);
+    };
+
+
+    return { initializeCell, undo, redo, clear };
 };
-
-
-
-// Vẽ tất cả các nét trước đó.
-// for (const stroke of allStrokes) {
-//     if (stroke.length < 2) continue;
-//     const outline = getStroke(stroke, strokeOptions);
-//     context.fill(getCanvasPath2D(outline));
-// }
-
-// const stroke = new Stroke(currentPoint);
-// stroke.Test();
-
-// allStrokes.push([...currentPoint]);
-// strokes.push(stroke);
