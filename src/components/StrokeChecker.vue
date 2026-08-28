@@ -7,13 +7,15 @@
                     <StrokeCell v-for="(char, i) in charList" 
                         :key="`${char}_${i}`"  
                         :ref="(el)=> { if(el) cellRefs[i] = el as InstanceType<typeof StrokeCell> }"
-                        @select="activeIndex = i" 
+                        @select="handleSelectCell(i)" 
                     />
                 </div>
-                <div class="stroke-checker__tool">
-                    <button class="botton-tool stroke-checker__tool-undo" @click="handleUndo">undo</button>
-                    <button class="botton-tool stroke-checker__tool-redo" @click="handleRedo">redo</button>
-                    <button class="botton-tool stroke-checker__tool-clear" @click="handleClear">clear</button>
+                <div class="stroke-checker__tool-wrapper">
+                    <div class="stroke-checker__tool" v-show="isShowTools" @click.stop>
+                        <button class="botton-tool stroke-checker__tool-undo" @click="handleUndo">undo</button>
+                        <button class="botton-tool stroke-checker__tool-redo" @click="handleRedo">redo</button>
+                        <button class="botton-tool stroke-checker__tool-clear" @click="handleClear">clear</button>
+                    </div>
                 </div>
             </div>
 
@@ -26,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import StrokeCell from './StrokeCell.vue';
 
 const props = withDefaults(defineProps<{ word?: string; }>(), { word: '电脑脑' });
@@ -34,9 +36,31 @@ const charList = computed(() => { return props.word.split('') });
 const cellRefs = ref<InstanceType<typeof StrokeCell>[]>([]);
 const activeIndex = ref<number>(0);
 
+const isShowTools = ref<Boolean>(false);
+
 const handleUndo = ()=> cellRefs.value[activeIndex.value]?.undo();
 const handleRedo = ()=> cellRefs.value[activeIndex.value]?.redo();
 const handleClear = ()=> cellRefs.value[activeIndex.value]?.clear();
+
+const handleSelectCell = (index: number)=> {
+    activeIndex.value = index;
+    isShowTools.value = true;
+}
+
+const handleClickOutside = (event: MouseEvent)=> {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.stroke-checker__grid')) {
+        isShowTools.value = false;
+    }
+}
+
+onMounted(()=> {
+    window.addEventListener('click', handleClickOutside);
+})
+
+onUnmounted(()=> {
+    window.removeEventListener('click', handleClickOutside);
+})
 
 const emits = defineEmits<{ back: [] }>();
 </script>
@@ -77,11 +101,16 @@ const emits = defineEmits<{ back: [] }>();
         align-items: center;
         gap: 16px; 
         width: 100%;
+        min-height: 0; // Tránh lỗi flex child bị tràn khung
+        margin-bottom: 20px;
+    }
+
+    &__tool-wrapper {
+        height: 40px; // Chiều cao cố định giữ chỗ
+        width: 100%;
     }
 
     &__tool {
-        width: 100%;
-        margin-top: 30px;
         display: flex;
         gap: 10px;
     }
