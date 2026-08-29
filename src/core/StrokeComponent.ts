@@ -1,5 +1,6 @@
-import { Bezier } from "./Bezier";
-import { normalize, Point2D } from "./Math";
+import { Bezier } from "../utils/Bezier";
+import { normalize, Point2D } from "../utils/Math";
+import type { StrokeData } from "./StrokeRegistry";
 
 // Một giao diện đại diện cho một nét cụ thể.
 // ------------------------------------------
@@ -11,13 +12,12 @@ export abstract class StrokeComponent {
     private readonly COUNT_POINT = 20;
 
 
-    public constructor(points: Point2D[]) {
-        this.bezier = new Bezier(points);
+    public constructor(strokeData: StrokeData) {
+        this.bezier = new Bezier(strokeData.points);
     }
 
     public draw(context: CanvasRenderingContext2D): void {
         this.drawComponent(context);
-
         // Ở đây có thể debug được.
     }
 

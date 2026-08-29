@@ -69,3 +69,7 @@ export const getCanvasPath2D = (strokeOutline: Vec2[]): Path2D => {
     path.closePath();
     return path;
 };
+
+export const inRange = (value: number, min: number, max: number): boolean => {
+    return value >= min && value <= max;
+}

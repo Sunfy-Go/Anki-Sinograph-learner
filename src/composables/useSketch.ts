@@ -1,7 +1,7 @@
 import { getMousePos } from '@/utils/utils';
 import type { Point2D } from '@/utils/Math';
-import { StrokeManager } from '@/utils/StrokeManager';
-import { PenDraw } from '@/utils/PenDraw';
+import { StrokeManager } from '@/core/StrokeManager';
+import { PenDraw } from '@/core/PenDraw';
 
 export const useSketch = () => {
     let isDrawing = false;

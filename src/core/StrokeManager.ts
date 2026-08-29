@@ -1,4 +1,4 @@
-import type { Point2D } from "./Math";
+import type { Point2D } from "../utils/Math";
 import { Stroke } from "./Stroke";
 
 export class StrokeManager {

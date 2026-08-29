@@ -1,12 +1,26 @@
-import { normalize, Point2D } from "./Math";
-import { StrokeComponent } from "./StrokeComponent";
+import { StrokeComponent } from "../StrokeComponent";
+import { normalize, Point2D } from "../../utils/Math";
+import { StrokeRegistry, type StrokeData } from "../StrokeRegistry";
+import { inRange } from "@/utils/utils";
 
 export class HorizontalStroke extends StrokeComponent {
-    private readonly R_MAX = 8;
-    private readonly R_MIN = this.R_MAX * 0.7;
+    private static readonly R_MAX = 8;
+    private static readonly R_MIN = this.R_MAX * 0.7;
 
-    constructor(points: Point2D[]) {
-        super(points);
+    private static readonly MIN_ANGLE_DEG = -11;
+    private static readonly MAX_ANGLE_DEG = 11;
+
+    static {
+        StrokeRegistry.register((data: StrokeData)=> {
+            if (!inRange(data.angle, HorizontalStroke.MIN_ANGLE_DEG, HorizontalStroke.MAX_ANGLE_DEG))
+                return null;
+
+            return new HorizontalStroke(data);
+        });
+    }
+
+    constructor(strokeData: StrokeData) {
+        super(strokeData);
         this.generateOffsetPoints();
     }
 
@@ -26,13 +40,12 @@ export class HorizontalStroke extends StrokeComponent {
         for (let i = this.rightOffsetPoints.length - 1; i >= 0; i--) {
             context.lineTo(this.rightOffsetPoints[i]!.x, this.rightOffsetPoints[i]!.y);
         }
-
         context.closePath();
         context.fill();
     }
 
     protected getWidthAt(t: number): number {
-        return this.R_MIN + 4*(t-0.5)*(t-0.5) * (this.R_MAX - this.R_MIN);;
+        return HorizontalStroke.R_MIN + 4*(t-0.5)*(t-0.5) * (HorizontalStroke.R_MAX - HorizontalStroke.R_MIN);;
     }
 
     private drawHeadStroke(context: CanvasRenderingContext2D) {

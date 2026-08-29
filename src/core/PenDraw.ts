@@ -1,6 +1,6 @@
+import type { Point2D } from "@/utils/Math";
+import { getCanvasPath2D } from "@/utils/utils";
 import getStroke, { type StrokeOptions } from "perfect-freehand";
-import type { Point2D } from "./Math";
-import { getCanvasPath2D } from "./utils";
 
 export class PenDraw {
     private strokeOptions: StrokeOptions = {
