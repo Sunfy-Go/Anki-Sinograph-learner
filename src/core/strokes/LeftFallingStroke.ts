@@ -2,25 +2,25 @@ import { StrokeComponent } from "../StrokeComponent";
 import { StrokeRegistry, type StrokeData } from "../StrokeRegistry";
 import { inRange } from "@/utils/utils";
 
-export class HorizontalStroke extends StrokeComponent {
-    private static readonly R_MAX = 8;
-    private static readonly R_MIN = this.R_MAX * 0.7;
-    private static readonly MIN_ANGLE_DEG = -11;
-    private static readonly MAX_ANGLE_DEG = 11;
+export class LeftFallingStroke extends StrokeComponent {
+    private static readonly R_MAX = 10;
+    private static readonly R_MIN = this.R_MAX * 0.6;
+    private static readonly MIN_ANGLE_DEG = 120;
+    private static readonly MAX_ANGLE_DEG = 145;
 
     static {
         StrokeRegistry.register((data: StrokeData)=> {
-            if (!inRange(data.angle, HorizontalStroke.MIN_ANGLE_DEG, HorizontalStroke.MAX_ANGLE_DEG))
+            if (!inRange(data.angle, LeftFallingStroke.MIN_ANGLE_DEG, LeftFallingStroke.MAX_ANGLE_DEG))
                 return null;
 
-            return new HorizontalStroke(data);
+            return new LeftFallingStroke(data);
         });
     }
 
-    constructor(strokeData: StrokeData) {
-        super(strokeData);
+    constructor(dataStroke: StrokeData) {
+        super(dataStroke);
         this.generateOffsetPoints();
-        this.calculateStartPoint(30, 7);
+        this.calculateStartPoint(30, 24);
         this.calculateEndPoint(30, 10);
     }
 
@@ -34,10 +34,14 @@ export class HorizontalStroke extends StrokeComponent {
     }
 
     protected getWidthLeftAt(t: number): number {
-        return HorizontalStroke.R_MIN + 4*(t-0.5)*(t-0.5) * (HorizontalStroke.R_MAX - HorizontalStroke.R_MIN);
+        if (t < 0.2) return LeftFallingStroke.R_MAX*0.8;
+
+        const u = (t - 0.2) / 0.8;
+        const factor = 0.5 * (1 + Math.cos(Math.PI * u));
+        return LeftFallingStroke.R_MIN*0.7 + (LeftFallingStroke.R_MAX*0.7 - LeftFallingStroke.R_MIN*0.7) * factor;
     }
 
     protected getWidthRightAt(t: number): number {
-        return HorizontalStroke.R_MIN + 4*(t-0.5)*(t-0.5) * (HorizontalStroke.R_MAX - HorizontalStroke.R_MIN);
+        return t + LeftFallingStroke.R_MIN;
     }
 }

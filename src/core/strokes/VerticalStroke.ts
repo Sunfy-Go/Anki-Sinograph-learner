@@ -2,25 +2,25 @@ import { StrokeComponent } from "../StrokeComponent";
 import { StrokeRegistry, type StrokeData } from "../StrokeRegistry";
 import { inRange } from "@/utils/utils";
 
-export class HorizontalStroke extends StrokeComponent {
-    private static readonly R_MAX = 8;
-    private static readonly R_MIN = this.R_MAX * 0.7;
-    private static readonly MIN_ANGLE_DEG = -11;
-    private static readonly MAX_ANGLE_DEG = 11;
+export class VerticalStroke extends StrokeComponent {
+    private static readonly R_MAX = 10;
+    private static readonly R_MIN = this.R_MAX * 0.6;
+    private static readonly MIN_ANGLE_DEG = 80;
+    private static readonly MAX_ANGLE_DEG = 100;
 
     static {
         StrokeRegistry.register((data: StrokeData)=> {
-            if (!inRange(data.angle, HorizontalStroke.MIN_ANGLE_DEG, HorizontalStroke.MAX_ANGLE_DEG))
+            if (!inRange(data.angle, VerticalStroke.MIN_ANGLE_DEG, VerticalStroke.MAX_ANGLE_DEG))
                 return null;
 
-            return new HorizontalStroke(data);
+            return new VerticalStroke(data);
         });
     }
 
     constructor(strokeData: StrokeData) {
         super(strokeData);
         this.generateOffsetPoints();
-        this.calculateStartPoint(30, 7);
+        this.calculateStartPoint(20, 24);
         this.calculateEndPoint(30, 10);
     }
 
@@ -34,10 +34,11 @@ export class HorizontalStroke extends StrokeComponent {
     }
 
     protected getWidthLeftAt(t: number): number {
-        return HorizontalStroke.R_MIN + 4*(t-0.5)*(t-0.5) * (HorizontalStroke.R_MAX - HorizontalStroke.R_MIN);
+        if (t >= 0.6) return t + VerticalStroke.R_MIN;
+        return VerticalStroke.R_MIN + 4*(t-0.5)*(t-0.5) * (VerticalStroke.R_MAX - VerticalStroke.R_MIN);
     }
 
     protected getWidthRightAt(t: number): number {
-        return HorizontalStroke.R_MIN + 4*(t-0.5)*(t-0.5) * (HorizontalStroke.R_MAX - HorizontalStroke.R_MIN);
+        return t + VerticalStroke.R_MIN;
     }
 }
